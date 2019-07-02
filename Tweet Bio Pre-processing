@@ -1,0 +1,21 @@
+import nltk,csv,numpy 
+from nltk import sent_tokenize, word_tokenize, pos_tag
+
+reader = csv.reader(open("/home/jupyter/MyData/biotrial.csv", 'r'), delimiter= ",",quotechar='|')
+tokenData = nltk.word_tokenize(str(reader))
+
+with open("/home/jupyter/MyData/biotrial.csv", "r") as csvfile:
+    listi = []
+    for line in reader:
+        for field in line:
+            tokens = word_tokenize(field)
+            tagged = nltk.pos_tag(tokens)
+            dicti = dict(tagged)
+        
+            for key,value in dicti.items():
+                if value[0] == "N":
+                    listi.append(key)
+    dataframe = pd.DataFrame(listi, columns=['tags'])
+            #print(dataframe)
+
+print(listi)
