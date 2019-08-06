@@ -1,0 +1,46 @@
+import sys
+
+from google.cloud import automl_v1beta1
+
+from google.cloud.automl_v1beta1.proto import service_pb2
+
+
+project_id = "nheri-reu"
+model_id = "ICN7836525892456470105"
+"""
+This code is used to utilize my trained machine learning model in Google AutoML Vision to label images
+
+The inputs are images in the form of jpeg or pdfs and the outputs are labels from my machine learning model
+
+You must first set up a GoogleML account and go to project selector page https://cloud.google.com/docs/authentication/getting-started#auth-cloud-implicit-python
+Once you have done this, go to your terminal and export the google credentials
+"""
+
+content = "/home/jupyter/MyData/dog.jpeg" #put image file name here
+
+"""
+End user inputs
+"""
+def get_prediction(content, project_id, model_id):
+    """
+    This function calls my machine learning model to label input image and outputs precision score and labels
+    
+    There are no other inputs needed for this function
+    """
+    prediction_client = automl_v1beta1.PredictionServiceClient()
+
+    name = 'projects/{}/locations/us-central1/models/{}'.format(project_id, model_id)
+    payload = {'image': {'image_bytes': content }}
+    params = {}
+    request = prediction_client.predict(name, payload, params)
+    return request  # waits till request is returned
+
+if __name__ == '__main__':
+    file_path = sys.argv[0]
+    project_id = sys.argv[1]
+    model_id = sys.argv[2]
+
+    with open("/home/jupyter/MyData/dog.jpeg", 'rb') as ff:
+        content = ff.read()
+
+    print(get_prediction(content, "nheri-reu",  "ICN7836525892456470105"))
