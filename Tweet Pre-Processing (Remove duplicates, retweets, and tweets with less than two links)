@@ -1,0 +1,72 @@
+
+import pandas as pd
+
+import openpyxl 
+
+from pandas import DataFrame
+
+"""
+This code is used to eliminate duplicate tweets, retweets, and tweets with less than two links.
+
+The input file must contain a tweet description column. 
+
+The output file is a csv file containing all the information from the input file but with 
+duplicate tweets, retweets, and tweets with less than two links removed. This code also outputs
+the number of tweets after removing duplicates and after removing retweets and tweets with less than two links.
+"""
+
+inputfilename = "/home/jupyter/MyData/Coastal(1).xlsx" #put your file name in here
+
+outputfilename = "/home/jupyter/MyData/1coastal.csv" #put where you want your file to go and file name here
+
+
+"""
+End user inputs 
+"""
+
+excelsheet = pd.read_excel(inputfilename) #imports excel file as dataframe
+
+#df1 = pd.read_csv(inputfilename) #can be used if the file is a csv
+
+fullexcel = pd.DataFrame(excelsheet)
+
+exceldescription = pd.DataFrame(excelsheet, columns= ['description']) #imports only description column
+
+exceldescription.drop_duplicates(keep = False, inplace = True) #deletes duplicates
+
+updated = fullexcel.drop_duplicates(['description'], keep = False) #dataframe after duplicates are removed
+
+#export_df = dataframe2.to_excel("/home/jupyter/MyData/NewFlorence6.xlsx") #can export this file if you want to skip 
+                                                                            #two link step
+
+print("Number of Unique Tweets: " + str(len(exceldescription))) #outputs the amount of tweets after removing duplicates
+                                                           
+print("""
+            """)
+
+
+def countlinks(data,column):
+    """
+    this function outputs the tweets that are likely to have images and removes retweets, 
+    and the count of how many tweets have at least two links
+    
+    There are no other inputs needed for this function
+    """
+    count = 0
+    tweetnumber = []
+ 
+    for index,row in column.itertuples():
+        stringrow = str(row)
+        if stringrow.count('http') > 1 and stringrow.count('RT')==0:
+            count = count + 1
+            tweetnumber.append(index)
+
+    complete = data.iloc[tweetnumber]
+
+    print("Number of Tweets with Images: " + str(count))
+    return(complete)
+
+
+complete2 = pd.DataFrame(countlinks(updated, description)) #dataframe after retweets and tweets with less than two links
+                                                            #are removed
+export_df = complete2.to_csv(outputfilename) #csv output file
