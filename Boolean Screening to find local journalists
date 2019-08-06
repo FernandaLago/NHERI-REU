@@ -1,0 +1,54 @@
+import pandas as pd
+
+import openpyxl
+
+from pandas import DataFrame
+
+""" 
+This code is used to extract local journalists from Twitter data using follower count. 
+
+The input file must contain a journalist name column, a user ID column,
+a tweet description column, a follower count column, and a user bio column
+
+The outputs are a csv after the follower screening and the count of users remaining.
+"""
+
+inputfilename = "/home/jupyter/MyData/Processed Florence Files/1Dorchester.csv" #put your file name here
+
+outputfilename = "/home/jupyter/MyData/Processed Source Florence Files/15Dorchester.csv" #put your output file name here
+
+uppercutoff = 500000 #upper follower cutoff
+
+lowercutoff = 1000 #lower follower cutoff
+
+"""
+End user inputs
+"""
+
+#fullexcel = dataframe2.to_excel("/home/jupyter/MyData/NewFlorence6.xlsx") #imports excel as dataframe
+
+excelsheet = pd.read_csv(inputfilename) #imports csv
+
+fullexcel = pd.DataFrame(excelsheet) #makes csv into dataframe
+
+excelfollowers = pd.DataFrame(fullexcel, columns= ['user_followers_count']) #imports description column
+
+def followercutoffs(data,column,upper,lower):
+    """
+    This function eliminates all users outside of the follower cutoffs. 
+    
+    """
+    count = 0
+    tweetnumber =[]
+    for index,row in column.itertuples():
+        if upper > row > lower:
+            count = count+1
+            tweetnumber.append(index)
+    complete = fullexcel.iloc[tweetnumber]
+    print("Number of Users within Follower Cutoffs: " + str(count))
+    
+    return(complete)
+
+complete = followercutoffs(fullexcel,excelfollowers,uppercutoff,lowercutoff) #dataframe with only user within follower cutoffs
+
+export_df = complete.to_csv(outputfilename) #exports dataframe as csv file
