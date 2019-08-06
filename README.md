@@ -15,3 +15,6 @@ In the Google AutoML Vision Model script, the code is used to input a user's ima
 on Google. The model recognizes presence of damage (damage, undamaged, none), type of damage (wind, erosion, flooding, debris),
 infrastructure damaged (house, commercial building, agriculture, utilities, personal belongings, road, statue), and other labels
 (rescue, animal, human). 
+
+In the Boolean Screening for local journalist script, the code is used to screen for local journalists on Twitter
+using follower count and user bios. 
