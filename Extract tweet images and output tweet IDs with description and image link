@@ -1,1 +1,170 @@
+import pandas as pd
+
+import xlsxwriter
+
+from pandas import DataFrame
+
+from urllib.parse import urlparse
+
+import time
+    
+import requests
+
+import tweepy
+
+from tweepy.auth import OAuthHandler
+
+import urllib3
+
+import pandas as pd
+
+import openpyxl
+
+from pandas import DataFrame
+
+import csv
+
+import json
+
+import gzip
+
+import os
+
+import shutil
+
+"""
+This code is used to confirm image presence and extract images from tweets and save them as zip files.
+
+The input file must contain a tweet description column and tweet link column
+
+The output file is a csv file containing all the information from the input file but with 
+information about the image presence or tweet in an added image column. Another output is a list of all image links
+and all of these images in a zip file from your folder
+
+Also, in order for you to use the Tweepy API, you must be registered as a twitter developer. Please register 
+as a developer to gain consumer key, secret, and access token and secret.
+"""
+
+inputfilename = "/home/jupyter/MyData/Processed Florence Files/1storm5.csv" #put your file name in here
+
+outputfoldername = "/home/jupyter/MyData/MorePictures2" #put where you want picture folder to go
+
+newoutputfoldername = "/home/jupyter/MyData/More Pictures 3" #what you want the folder of images to be named and zip file
+
+consumer_key = 'JAmEEW3uSekOD4tkRSuweRtbP1'
+
+consumer_secret = 'giMnfSD1UdJ9F6mpgaeXMKWaDy5jAecp6NpZ4dyR77oiAjC2Ll1'
+
+access_token = '840078082019020800-ojx8gcJPRFTU9rT0XfjAXNwEEAiaqTF1'
+
+access_secret = 'Wt7yMNaQgIFgXDAee6HlrqpzkXfeBFE9ySt6F7UZrWRS21'
+
+"""
+End user inputs 
+"""
+
+#excelsheet = pd.read_excel("/home/jupyter/MyData/test10.xlsx") #imports excel file as dataframe
+
+df1 = pd.read_csv(inputfilename) #imports csv file as dataframe
+
+link = df1[['link']] #column of tweet links
+
+description = df1[['description']] #column of tweet descriptions
+
+auth = OAuthHandler(consumer_key, consumer_secret)
+
+auth.set_access_token(access_token, access_secret)
+
+api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+
+
+def makeIDlist(data,linkcolumn,descriptioncolumn):
+"""
+This function gets tweet IDs from tweet links
+"""
+    IDlist = []
+    descriptionlist = []
+    
+    for index,row in linkcolumn.itertuples():
+        ID = row[-19:]
+        IDlist.append(ID)
+        descriptionlist
+    for row in descriptioncolumn.itertuples():
+        descriptionlist.append(row[1])
+    data_tuples = list(zip(IDlist,descriptionlist))
+    dataframe = pd.DataFrame(data_tuples, columns=['ID','description'])
+    
+    return(dataframe)
+    
+fullsheet = (makeIDlist(df1,link,description)) #output of function with tweet IDs instead of tweet links
+
+def gettweets(ID):
+
+    resultlist = []
+    count = 0
+    linklist = []
+
+    for index,row in ID[['ID']].itertuples():
+        print(row)
+        try:
+            
+            tweet = api.get_status(id = row)
+            result = tweet.entities['media'][0]['media_url']
+            resultlist.append(result)
+            count = count + 1
+            if result[0:4] == 'http':
+                linklist.append(result)
+                print(index,result)
+                
+            else:
+                pass
+     
+        except KeyError:
+            resultlist.append("Does not contain an image")
+            print("Does not contain an image")
+
+        except tweepy.TweepError:
+         
+            resultlist.append("Tweet no longer exists")
+            print("Tweet no longer exists")     
+
+    return(resultlist)
+
+resultlistt = (gettweets(fullsheet))
+df = pd.DataFrame({'image':resultlistt}) #makes resultlist into a dataframe column
+result = pd.concat([fullsheet,df], axis=1)  #adds image classification to fullsheet as new column
+print(result)
+export_df = result.to_csv("/home/jupyter/MyData/Processed Florence Files/3storm5.csv") #exports combined dataframe as csv
+
+
+
+"""
+This code takes dataframe of image links, extracts the images, and makes the images into zip files
+"""
+
+http = urllib3.PoolManager()
+
+#df1 = pd.read_csv("/home/jupyter/MyData/2flooding.csv") #you can also import your own links to extract images
+
+df2 = df.drop_duplicates(['Link'], keep = False)
+
+df3 = pd.DataFrame(df2, columns= ['Link'])
+
+links = pd.DataFrame(df3)
+
+dfToList = links['Link'].tolist()
+
+
+N =1
+print("downloading with urllib")
+for url in dfToList:
+    print(url)
+    r = http.request('GET',url)
+    Name =str(N+1) 
+    N += 1
+    with open(outputfoldername + "/file"+Name+".jpg", "wb") as fcont:
+        fcont.write(r.data)
+        
+shutil.make_archive(newoutputfoldername, 'zip',outputfoldername)
+
 
